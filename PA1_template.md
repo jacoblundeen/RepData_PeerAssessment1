@@ -1,14 +1,10 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 Date: 2017-08-04  
 By: Jacob M. Lundeen
 
 ## Loading and preprocessing the data
-```{r loading, cache = FALSE}
+
+```r
 ##The needed libraries are loaded and then the file is downloaded, unzipped and read in as a data table.
 library(data.table)
 library(ggplot2)
@@ -19,7 +15,8 @@ unlink(temp)
 ```
 
 ## What is mean total number of steps taken per day?
-```{r mean, cache = FALSE}
+
+```r
 ##Calculate the sum of the steps on a daily basis
 step.sum <- na.omit(data[, list(stepSum = sum(steps)), by = "date"])
 
@@ -27,17 +24,22 @@ step.sum <- na.omit(data[, list(stepSum = sum(steps)), by = "date"])
 g <- ggplot(step.sum, aes(stepSum))
 g + geom_histogram(binwidth = 500, show.legend = FALSE) + labs(x = "Total Steps Taken by Day", y = "Count", title = "Histogram of Total Steps Taken by Day") + theme_bw() + 
      theme(plot.title = element_text(hjust = 0.5))
+```
 
+![](PA1_template_files/figure-html/mean-1.png)<!-- -->
+
+```r
 ##Calculate mean and median values of daily step totals
 step.mean <- mean(step.sum$stepSum)
 step.median <- median(step.sum$stepSum)
 ```
 
-* Mean: `r format(round(step.mean, digits = 2), nsmall = 2)`
-* Median: `r step.median`
+* Mean: 10766.19
+* Median: 10765
 
 ## What is the average daily activity pattern?
-```{r daily}
+
+```r
 ##Calculate the average number of steps per five minute interval
 step.interval <- aggregate(steps ~ interval, data, mean)
 
@@ -48,21 +50,26 @@ q + geom_line() + labs(x = "Time Intervals (mins)", y = "Average Number of Steps
      theme_bw() + theme(plot.title = element_text(hjust = 0.5))
 ```
 
-```{r max}
+![](PA1_template_files/figure-html/daily-1.png)<!-- -->
+
+
+```r
 ##Find the index number of the interval with the largest amount of steps
 step.max <- which.max(step.interval$steps)
 ```
 
-The 5-minute interval, on average across all days, that contains the maximum number of steps is `r step.interval$interval[step.max]`. The number of steps is `r round(step.interval$steps[step.max], digits = 2)`.
+The 5-minute interval, on average across all days, that contains the maximum number of steps is 835. The number of steps is 206.17.
 
 ## Imputing missing values
-```{r missing}
+
+```r
 ##Find total number of missing values from the original data set
 step.miss <- sum(is.na(data))
 ```
-The original data set is missing `r step.miss` values.
+The original data set is missing 2304 values.
 
-```{r impute}
+
+```r
 ##Create new data set that will be used to impute missing values
 impute.Data <- data
 
@@ -82,19 +89,24 @@ impute.sum <- impute.Data[, list(imputeSum = sum(steps)), by = "date"]
 p <- ggplot(impute.sum, aes(imputeSum))
 g + geom_histogram(binwidth = 500, show.legend = FALSE) + labs(x = "Total Steps Taken by Day", y = "Count", title = "Histogram of Total Steps Taken by Day") + theme_bw() + 
      theme(plot.title = element_text(hjust = 0.5))
+```
 
+![](PA1_template_files/figure-html/impute-1.png)<!-- -->
+
+```r
 ##Calculate mean and median of the new imputed totals
 impute.mean <- mean(impute.sum$imputeSum)
 impute.median <- median(impute.sum$imputeSum)
 ```
-* Mean: `r format(round(impute.mean, digits = 2), nsmall = 2)`
-* Median: `r format(round(impute.median, digits = 2), nsmall = 2)`
+* Mean: 10766.19
+* Median: 10766.19
 
 We can see that the mean value has not changed, but the median value has changed to be equal to the mean value. The impact is, as expected, that the count total increased.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r day.type}
+
+```r
 ##Coerce the date column into a date class
 impute.Data$date <- as.Date(impute.Data$date)
 
@@ -123,5 +135,7 @@ z + geom_line(stat = "identity", aes(color = day.type)) + labs(x = "Time Interva
      theme_bw() + theme(plot.title = element_text(hjust = 0.5)) + facet_grid(day.type ~.) +
      scale_color_discrete(name = "Day Type")
 ```
+
+![](PA1_template_files/figure-html/day.type-1.png)<!-- -->
 
 We can see from the graphs above that activity tends to start later in the day on the weekend and is more consistent throughout the day. There is no morning spike and then large drop off, as we see in the weekday graph.
